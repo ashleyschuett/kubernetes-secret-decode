@@ -1,4 +1,4 @@
-#Kubernetes Secret Decode
+# Kubernetes Secret Decode
 
 ### Description
 Be able to easily see the values of a secret.
