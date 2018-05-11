@@ -51,5 +51,16 @@ cd kubernetes-secret-decode && \
 go build -o $GOPATH/bin/ksd
 ```
 
+```
+go get github.com/ashleyschuett/kubernetes-secret-decode && \
+cd $GOPATH/github.com/ashleyschuett && \
+go build -o $GOPATH/bin/ksd
+```
+
+Another option is to download the binary and add it to your path
+```
+curl -O https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v1.0/ksd
+```
+
 ### Usage
 `kubectl get secret my-secret -o yaml | ksd`
