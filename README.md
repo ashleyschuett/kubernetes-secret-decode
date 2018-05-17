@@ -3,6 +3,8 @@
 ### Description
 Be able to easily see the values of a secret.
 
+YAML and JSON are both supported and detection of the input type is performed automatically.
+
 **Before:**
 ```yaml
 $ kubectl get secret my-secret -o yaml
@@ -64,3 +66,5 @@ curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/down
 
 ### Usage
 `kubectl get secret my-secret -o yaml | ksd`
+
+`kubectl get secret my-secret -o json | ksd`
