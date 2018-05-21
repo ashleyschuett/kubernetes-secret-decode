@@ -5,9 +5,10 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	yaml "gopkg.in/yaml.v2"
 	"io"
 	"os"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 // SecretData extracts out the data portion of a kubernetes secret
@@ -28,9 +29,9 @@ func main() {
 	}
 
 	if (info.Mode()&os.ModeCharDevice) != 0 || info.Size() < 0 {
-		fmt.Println("The command is intended to work with pipes.")
-		fmt.Println("Usage: kubectl get secret <secret-name> -o <yaml|json> |", os.Args[0])
-		return
+		fmt.Fprintln(os.Stderr, "The command is intended to work with pipes.")
+		fmt.Fprintln(os.Stderr, "Usage: kubectl get secret <secret-name> -o <yaml|json> |", os.Args[0])
+		os.Exit(1)
 	}
 
 	output := getKubectlSecretOutput()
@@ -39,20 +40,19 @@ func main() {
 
 	sd, err := getDecodedSecretData(unmarshal, output)
 	if err != nil {
-		fmt.Print(err)
-		return
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	s, err := getFullSecretWithDecodedData(unmarshal, output, sd)
 	if err != nil {
-		fmt.Print(err)
-		return
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	secret := getStringSecret(s, isJSON)
-
 	// Print exposed secret
-	fmt.Print(secret)
+	fmt.Fprint(os.Stdout, secret)
 }
 
 func getUnmarshalByOutputType(isJSON bool) Unmarshallable {
@@ -87,7 +87,7 @@ func getFullSecretWithDecodedData(unmarshal Unmarshallable, output []byte, sd *S
 		return nil, err
 	}
 
-	for key, _ := range s {
+	for key := range s {
 		if key == "data" {
 			s[key] = sd.Data
 		}
@@ -114,8 +114,8 @@ func getDecodedSecretData(unmarshal Unmarshallable, output []byte) (*SecretData,
 }
 
 func getKubectlSecretOutput() []byte {
-	reader := bufio.NewReader(os.Stdin)
 	var output []byte
+	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		input, err := reader.ReadByte()
@@ -130,7 +130,7 @@ func getKubectlSecretOutput() []byte {
 }
 
 func isJSON(s []byte) bool {
-	var js interface{}
+	var js json.RawMessage
 	return json.Unmarshal(s, &js) == nil
 }
 
