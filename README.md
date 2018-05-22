@@ -61,7 +61,7 @@ go build -o $GOPATH/bin/ksd
 
 Another option is to download the binary and add it to your path
 ```
-curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v1.0/ksd && chmod +x ksd && sudo mv ksd /usr/local/bin 
+curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v1.0.1/ksd && chmod +x ksd && sudo mv ksd /usr/local/bin 
 ```
 
 ### Usage
