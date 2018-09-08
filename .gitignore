@@ -1,1 +1,4 @@
 vendor
+.glide
+glide.lock
+ksd
