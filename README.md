@@ -59,6 +59,12 @@ cd $GOPATH/github.com/ashleyschuett && \
 go build -o $GOPATH/bin/ksd
 ```
 
+If you do not have go installed locally, but have Docker:
+
+```bash
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/go/src/github.com/ashleyschuett/k8s-secret-decode -w /go/src/github.com/ashleyschuett/k8s-secret-decode billyteves/alpine-golang-glide:1.2.0 bash -c 'glide update && go build -v -o ksd'
+```
+
 Another option is to download the binary and add it to your path
 ```
 curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v1.0.1/ksd && chmod +x ksd && sudo mv ksd /usr/local/bin 
