@@ -11,12 +11,21 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// SecretData extracts out the data portion of a kubernetes secret
+const (
+	// dataKey is the name of the key that is populated with the Kubernetes
+	// secret's data
+	dataKey = "data"
+	// stringDataKey is the name of the key that is used writing a secret's plain
+	// text information to save to the secret. On save Kubernetes encodes this field
+	stringDataKey = "stringData"
+)
+
+// SecretData extracts out the data portion of a Kubernetes secret
 type SecretData struct {
 	Data map[string]string `json:"data" yaml:"data"`
 }
 
-// Secret allows us to read and return the full kubernetes secret
+// Secret allows us to read and return the full Kubernetes secret
 type Secret map[string]interface{}
 
 // Unmarshallable allows me to unmarsal different strings with the same interface
@@ -88,10 +97,12 @@ func getFullSecretWithDecodedData(unmarshal Unmarshallable, output []byte, sd *S
 	}
 
 	for key := range s {
-		if key == "data" {
-			s[key] = sd.Data
+		if key == dataKey {
+			s[stringDataKey] = sd.Data
 		}
 	}
+
+	delete(s, dataKey)
 
 	return &s, nil
 }
