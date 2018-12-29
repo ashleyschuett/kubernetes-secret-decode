@@ -27,7 +27,7 @@ type: Opaque
 ```yaml
 $ kubectl get secret my-secret -o yaml | ksd
 apiVersion: v1
-data:
+stringData:
   password: password
   username: username
 kind: Secret
@@ -46,28 +46,18 @@ type: Opaque
 These instructions assume you have go installed and a $GOPATH set.
 
 ```
-mkdir -p $GOPATH/github.com/ashleyschuett && \
-cd $GOPATH/github.com/ashleyschuett && \
-git clone https://github.com/ashleyschuett/kubernetes-secret-decode.git && \
-cd kubernetes-secret-decode && \
-go build -o $GOPATH/bin/ksd
-```
-
-```
-go get github.com/ashleyschuett/kubernetes-secret-decode && \
-cd $GOPATH/github.com/ashleyschuett && \
-go build -o $GOPATH/bin/ksd
+make install
 ```
 
 If you do not have go installed locally, but have Docker:
 
 ```bash
-docker run -u $(id -u):$(id -g) --rm -v "$PWD":/go/src/github.com/ashleyschuett/k8s-secret-decode -w /go/src/github.com/ashleyschuett/k8s-secret-decode billyteves/alpine-golang-glide:1.2.0 bash -c 'glide update && go build -v -o ksd'
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/go/src/github.com/ashleyschuett/kubernetes-secret-decode -w /go/src/github.com/ashleyschuett/kubernetes-secret-decode billyteves/alpine-golang-glide:1.2.0 bash -c 'glide update && go build -v -o ksd'
 ```
 
 Another option is to download the binary and add it to your path
 ```
-curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v1.0.1/ksd && chmod +x ksd && sudo mv ksd /usr/local/bin 
+curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v2.0.0/ksd && chmod +x ksd && sudo mv ksd /usr/local/bin
 ```
 
 ### Usage
