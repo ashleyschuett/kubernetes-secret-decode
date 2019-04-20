@@ -25,7 +25,7 @@ type: Opaque
 
 **After:**
 ```yaml
-$ kubectl get secret my-secret -o yaml | ksd
+$ kubectl ksd get secret my-secret -o yaml
 apiVersion: v1
 stringData:
   password: password
@@ -43,24 +43,21 @@ type: Opaque
 
 ### Installation
 
-These instructions assume you have go installed and a $GOPATH set.
+These instructions assume you have go installed and a `$GOPATH` set.
+The binary needs to be installed somewhere in your `$PATH`.
+The binary also needs to be named either `kubectl-ksd` or `kubectl-kubernetes-secret-decode`
 
+For easy install running the following:
 ```
 make install
 ```
 
-If you do not have go installed locally, but have Docker:
-
-```bash
-docker run -u $(id -u):$(id -g) --rm -v "$PWD":/go/src/github.com/ashleyschuett/kubernetes-secret-decode -w /go/src/github.com/ashleyschuett/kubernetes-secret-decode billyteves/alpine-golang-glide:1.2.0 bash -c 'glide update && go build -v -o ksd'
-```
-
 Another option is to download the binary and add it to your path
 ```
-curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v2.0.0/ksd && chmod +x ksd && sudo mv ksd /usr/local/bin
+curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v3.0.0/kubectl-ksd && chmod +x ksd && sudo mv ksd /usr/local/bin
 ```
 
 ### Usage
-`kubectl get secret my-secret -o yaml | ksd`
+`kubectl ksd get secret my-secret -o yaml`
 
-`kubectl get secret my-secret -o json | ksd`
+`kubectl ksd get secret my-secret -o json`

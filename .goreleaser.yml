@@ -5,7 +5,7 @@ builds:
   env:
     - CGO_ENABLED=0
   main: ./main.go
-  binary: kubernetes-secret-decode
+  binary: kubectl-ksd
 archive:
   replacements:
     darwin: Darwin

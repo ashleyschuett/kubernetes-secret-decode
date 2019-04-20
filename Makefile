@@ -1,5 +1,6 @@
 SHELL=/bin/bash
-BINARY_NAME:="ksd"
+BINARY_NAME:="kubectl-ksd"
+GOPATH:="${HOME}/go"
 
 .PHONY: install
 install: ## Install the binary 

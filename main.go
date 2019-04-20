@@ -2,11 +2,14 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -20,6 +23,8 @@ const (
 	stringDataKey = "stringData"
 )
 
+var outputType string
+
 // SecretData extracts out the data portion of a Kubernetes secret
 type SecretData struct {
 	Data map[string]string `json:"data" yaml:"data"`
@@ -32,42 +37,71 @@ type Secret map[string]interface{}
 type Unmarshallable func([]byte, interface{}) error
 
 func main() {
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		panic(err)
-	}
+	// parse the rest of the command to kubectl and run it
+	output := parseAndRunCommand()
+	unmarshal := getUnmarshalByOutputType(outputType)
 
-	if (info.Mode()&os.ModeCharDevice) != 0 || info.Size() < 0 {
-		fmt.Fprintln(os.Stderr, "The command is intended to work with pipes.")
-		fmt.Fprintln(os.Stderr, "Usage: kubectl get secret <secret-name> -o <yaml|json> |", os.Args[0])
-		os.Exit(1)
-	}
-
-	output := getKubectlSecretOutput()
-	isJSON := isJSON(output)
-	unmarshal := getUnmarshalByOutputType(isJSON)
-
-	sd, err := getDecodedSecretData(unmarshal, output)
+	sd, err := getDecodedSecretData(unmarshal, output.Bytes())
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	s, err := getFullSecretWithDecodedData(unmarshal, output, sd)
+	s, err := getFullSecretWithDecodedData(unmarshal, output.Bytes(), sd)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	secret := getStringSecret(s, isJSON)
+	secret := getStringSecret(s, outputType)
 	// Print exposed secret
-	fmt.Fprint(os.Stdout, secret)
+	fmt.Fprintf(os.Stdout, "%s\n", secret)
 }
 
-func getUnmarshalByOutputType(isJSON bool) Unmarshallable {
+func parseAndRunCommand() bytes.Buffer {
+	args := getKubectlArgs()
 
+	// check that the global output type was set, if it's not set we can not decode the secret
+	if outputType == "" {
+		fmt.Fprintf(os.Stdout, "please set -o flag to json or yaml\n")
+		os.Exit(1)
+	}
+
+	cmd := exec.Command("kubectl", args...)
+
+	var output, errb bytes.Buffer
+	cmd.Stdout = &output
+	cmd.Stderr = &errb
+
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintf(os.Stdout, errb.String())
+		os.Exit(1)
+	}
+
+	return output
+}
+
+func getKubectlArgs() []string {
+	var args []string
+
+	for i, arg := range os.Args {
+		// remove the ksd binary from the kubectl command
+		if strings.Contains(arg, "kubectl-ksd") || strings.Contains(arg, "kubernetes-secret-decode") {
+			args = append(os.Args[:i], os.Args[i+1:]...)
+		}
+
+		if strings.Contains(arg, "json") || strings.Contains(arg, "yaml") {
+			// this set the global variable that is used for parsing the output
+			outputType = strings.Trim(arg, "-o")
+		}
+	}
+
+	return args
+}
+
+func getUnmarshalByOutputType(outputType string) Unmarshallable {
 	var unmarshal Unmarshallable
-	if isJSON {
+	if isJSON(outputType) {
 		unmarshal = json.Unmarshal
 	} else {
 		unmarshal = yaml.Unmarshal
@@ -76,9 +110,9 @@ func getUnmarshalByOutputType(isJSON bool) Unmarshallable {
 	return unmarshal
 }
 
-func getStringSecret(s *Secret, isJSON bool) string {
+func getStringSecret(s *Secret, outputType string) string {
 	var secret []byte
-	if isJSON {
+	if isJSON(outputType) {
 		secret, _ = json.MarshalIndent(s, "", "    ")
 	} else {
 		secret, _ = yaml.Marshal(s)
@@ -126,7 +160,7 @@ func getDecodedSecretData(unmarshal Unmarshallable, output []byte) (*SecretData,
 
 func getKubectlSecretOutput() []byte {
 	var output []byte
-	reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdout)
 
 	for {
 		input, err := reader.ReadByte()
@@ -140,9 +174,8 @@ func getKubectlSecretOutput() []byte {
 	return output
 }
 
-func isJSON(s []byte) bool {
-	var js json.RawMessage
-	return json.Unmarshal(s, &js) == nil
+func isJSON(o string) bool {
+	return o == "json"
 }
 
 func parseData(s *SecretData) error {
