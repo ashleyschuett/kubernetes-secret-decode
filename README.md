@@ -54,7 +54,7 @@ make install
 
 Another option is to download the binary and add it to your path
 ```
-curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v3.0.0/kubectl-ksd && chmod +x ksd && sudo mv ksd /usr/local/bin
+curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v3.0.0/kubectl-ksd && chmod +x kubectl-ksd && sudo mv kubectl-ksd /usr/local/bin
 ```
 
 ### Usage
