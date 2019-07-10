@@ -44,15 +44,17 @@ type: Opaque
 ### Installation
 
 These instructions assume you have go installed and a `$GOPATH` set.
-The binary needs to be installed somewhere in your `$PATH`.
-The binary also needs to be named either `kubectl-ksd` or `kubectl-kubernetes-secret-decode`
+If you have not set `$GOPATH` it will be assumed to be `$HOME/go`
 
-For easy install running the following:
+For easy install, running the following:
 ```
 make install
 ```
 
-Another option is to download the binary and add it to your path
+Another option is to download the binary and add it to your path.
+The binary needs to be installed somewhere in your system `$PATH`.
+The binary also needs to be named either `kubectl-ksd` or `kubectl-kubernetes-secret-decode`
+
 ```
 curl -LO https://github.com/ashleyschuett/kubernetes-secret-decode/releases/download/v3.0.0/kubectl-ksd && chmod +x ksd && sudo mv ksd /usr/local/bin
 ```
