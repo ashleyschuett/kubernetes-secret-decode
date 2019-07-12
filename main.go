@@ -85,12 +85,21 @@ func getKubectlArgs() []string {
 	var args []string
 
 	for i, arg := range os.Args {
+		// do not expect `get secret` when called as kubectl-decode-secret
+		if strings.HasSuffix(arg, "kubectl-decode-secret") {
+			args = make([]string, i, len(os.Args)+1)
+			copy(args, os.Args)
+			args = append(args, "get", "secret")
+			args = append(args, os.Args[i+1:]...)
+		}
+
 		// remove the ksd binary from the kubectl command
-		if strings.Contains(arg, "kubectl-ksd") || strings.Contains(arg, "kubernetes-secret-decode") {
+		if strings.HasSuffix(arg, "kubectl-ksd") ||
+			strings.HasSuffix(arg, "kubernetes-secret-decode") {
 			args = append(os.Args[:i], os.Args[i+1:]...)
 		}
 
-		if strings.Contains(arg, "json") || strings.Contains(arg, "yaml") {
+		if strings.HasSuffix(arg, "json") || strings.HasSuffix(arg, "yaml") {
 			// this set the global variable that is used for parsing the output
 			outputType = strings.Trim(arg, "-o")
 		}
